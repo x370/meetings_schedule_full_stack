@@ -1,7 +1,7 @@
 const actionService = require('../services/actionService');
 const { actionItemSchema } = require('../schemas');
 
-exports.addActionItem = async (req, res) => {
+const addActionItem = async (req, res) => {
     try {
         const validatedData = actionItemSchema.parse(req.body);
         const item = await actionService.addActionItem(validatedData);
@@ -12,7 +12,7 @@ exports.addActionItem = async (req, res) => {
     }
 };
 
-exports.markAsDone = async (req, res) => {
+const markAsDone = async (req, res) => {
     try {
         const item = await actionService.toggleActionStatus(req.params.id);
         res.status(200).json(item);
@@ -22,7 +22,7 @@ exports.markAsDone = async (req, res) => {
     }
 };
 
-exports.deleteActionItem = async (req, res) => {
+const deleteActionItem = async (req, res) => {
     try {
         await actionService.removeActionItem(req.params.id);
         res.status(200).json({ message: 'Deleted' });
@@ -30,3 +30,5 @@ exports.deleteActionItem = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+module.exports = { addActionItem, markAsDone, deleteActionItem };

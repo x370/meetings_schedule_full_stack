@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body 
+      <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
@@ -38,7 +38,7 @@ export default function RootLayout({
               token: {
                 colorPrimary: '#6366f1',
                 borderRadius: 12,
-                colorBgLayout: '#f9fafb', // Modern SaaS Background
+                colorBgLayout: '#f9fafb',
                 colorBgContainer: '#ffffff',
                 colorTextHeading: '#111827',
                 colorText: '#374151',

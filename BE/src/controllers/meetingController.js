@@ -1,7 +1,7 @@
 const meetingService = require('../services/meetingService');
 const { meetingSchema } = require('../schemas');
 
-exports.getMeetings = async (req, res) => {
+const getMeetings = async (req, res) => {
     try {
         const meetings = await meetingService.getAllMeetings();
         res.status(200).json(meetings);
@@ -10,7 +10,7 @@ exports.getMeetings = async (req, res) => {
     }
 };
 
-exports.getMeetingById = async (req, res) => {
+const getMeetingById = async (req, res) => {
     try {
         const meeting = await meetingService.getMeetingById(req.params.id);
         res.status(200).json(meeting);
@@ -20,7 +20,7 @@ exports.getMeetingById = async (req, res) => {
     }
 };
 
-exports.createMeeting = async (req, res) => {
+const createMeeting = async (req, res) => {
     try {
         const validatedData = meetingSchema.parse(req.body);
         const meeting = await meetingService.createNewMeeting(validatedData);
@@ -31,7 +31,7 @@ exports.createMeeting = async (req, res) => {
     }
 };
 
-exports.deleteMeeting = async (req, res) => {
+const deleteMeeting = async (req, res) => {
     try {
         await meetingService.deleteMeeting(req.params.id);
         res.status(200).json({ message: 'Deleted' });
@@ -39,3 +39,5 @@ exports.deleteMeeting = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+module.exports = { getMeetings, getMeetingById, createMeeting, deleteMeeting };
