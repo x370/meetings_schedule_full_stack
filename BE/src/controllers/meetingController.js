@@ -27,6 +27,9 @@ exports.getMeetings = async (req, res) => {
             orderBy: {
                 date_time: 'desc',
             },
+            include: {
+                action_items: true,
+            },
         });
         res.status(200).json(meetings);
     } catch (err) {

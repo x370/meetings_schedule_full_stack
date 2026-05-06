@@ -1,186 +1,225 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { 
+  Button, 
+  Input, 
+  Modal, 
+  Card, 
+  Typography, 
+  Space, 
+  Empty, 
+  Spin, 
+  App,
+  Tag,
+  Layout
+} from 'antd';
+import { 
+  PlusOutlined, 
+  SearchOutlined, 
+  CalendarOutlined, 
+  RightOutlined,
+  CheckCircleOutlined,
+  VideoCameraOutlined,
+  ClockCircleOutlined,
+  ExclamationCircleOutlined
+} from '@ant-design/icons';
 import Link from 'next/link';
-import { Plus, Search, Calendar, ChevronRight, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { meetingService } from '@/services/api';
-import { cn } from '@/lib/utils';
+import { useMeetings } from '../hooks/useMeetings';
 
-interface Meeting {
-  id: number;
-  title: string;
-  notes: string;
-  date_time: string;
-}
+const { Title, Text } = Typography;
+const { TextArea } = Input;
+const { Header, Content } = Layout;
 
-export default function MeetingsPage() {
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
-  const [newMeeting, setNewMeeting] = useState({ title: '', notes: '' });
+export default function Home() {
+  const { message } = App.useApp();
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newMeetingTitle, setNewMeetingTitle] = useState('');
+  const [newMeetingNotes, setNewMeetingNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { meetings, loading, error, addMeeting } = useMeetings();
 
   useEffect(() => {
     setMounted(true);
-    fetchMeetings();
   }, []);
 
-  const fetchMeetings = async () => {
-    try {
-      const data = await meetingService.getMeetings();
-      setMeetings(data);
-    } catch (err) {
-      console.error('Failed to fetch meetings:', err);
-    } finally {
-      setLoading(false);
+  const handleAddMeeting = async () => {
+    if (!newMeetingTitle.trim()) {
+      message.warning('Title is required');
+      return;
     }
-  };
 
-  const handleAddMeeting = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMeeting.title.trim()) return;
-
+    setIsSubmitting(true);
     try {
-      const created = await meetingService.createMeeting(newMeeting);
-      setMeetings([created, ...meetings]);
-      setIsAdding(false);
-      setNewMeeting({ title: '', notes: '' });
+      await addMeeting(newMeetingTitle, newMeetingNotes);
+      message.success('Meeting created');
+      setNewMeetingTitle('');
+      setNewMeetingNotes('');
+      setShowAddModal(false);
     } catch (err) {
-      console.error('Failed to add meeting:', err);
+      message.error('Error creating meeting');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const filteredMeetings = meetings.filter(m => 
-    m.title.toLowerCase().includes(search.toLowerCase())
+    m.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (!mounted) return null;
+
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">Meeting Notes</h1>
-          <p className="text-muted-foreground mt-1">Manage your client calls and follow-ups.</p>
+    <Layout style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      <Header style={{ 
+        background: 'rgba(255, 255, 255, 0.8)', 
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid #e5e7eb',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 40px',
+        height: 64
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: '#6366f1', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <VideoCameraOutlined style={{ color: 'white', fontSize: 18 }} />
+          </div>
+          <Title level={4} style={{ margin: 0, letterSpacing: '-0.5px' }}>MeetNotes</Title>
         </div>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full font-medium transition-transform hover:scale-105 active:scale-95"
-        >
-          <Plus size={20} />
-          <span>New Meeting</span>
-        </button>
-      </header>
-
-      {/* Search Bar */}
-      <div className="relative group">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={20} />
-        <input
-          type="text"
-          placeholder="Search by meeting title..."
-          className="w-full bg-secondary border border-border pl-10 pr-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* Add Meeting Modal (Simple Overlay) */}
-      <AnimatePresence>
-        {isAdding && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        
+        <Space size={16}>
+          <Input 
+            prefix={<SearchOutlined style={{ color: '#9ca3af' }} />} 
+            placeholder="Quick search..." 
+            variant="filled"
+            style={{ width: 240, borderRadius: 8 }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />} 
+            onClick={() => setShowAddModal(true)}
+            style={{ borderRadius: 8 }}
           >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-card w-full max-w-md p-6 rounded-3xl shadow-2xl border border-border"
-            >
-              <h2 className="text-2xl font-bold mb-4">New Meeting</h2>
-              <form onSubmit={handleAddMeeting} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground">Title</label>
-                  <input
-                    autoFocus
-                    required
-                    type="text"
-                    className="w-full bg-secondary p-3 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder="E.g. Project Kickoff"
-                    value={newMeeting.title}
-                    onChange={(e) => setNewMeeting({ ...newMeeting, title: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-muted-foreground">Initial Notes</label>
-                  <textarea
-                    className="w-full bg-secondary p-3 rounded-xl border border-border focus:ring-2 focus:ring-primary/20 outline-none h-32 resize-none"
-                    placeholder="Brief summary..."
-                    value={newMeeting.notes}
-                    onChange={(e) => setNewMeeting({ ...newMeeting, notes: e.target.value })}
-                  />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    type="button"
-                    onClick={() => setIsAdding(false)}
-                    className="flex-1 px-4 py-2 border border-border rounded-xl font-medium hover:bg-secondary transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-xl font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Create
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            New Meeting
+          </Button>
+        </Space>
+      </Header>
 
-      {/* Meetings List */}
-      <div className="grid gap-4">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="animate-spin mb-2" size={32} />
-            <p>Loading meetings...</p>
+      <Content style={{ padding: '48px 40px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: 40 }}>
+          <Title level={2} style={{ margin: 0, fontWeight: 700 }}>All Meetings</Title>
+          <Text type="secondary">Review and manage your team synchronizations.</Text>
+        </div>
+
+        <Spin spinning={loading} description="Loading schedule...">
+          {error ? (
+            <Card style={{ borderColor: '#fee2e2', background: '#fef2f2' }}>
+              <Text type="danger">{error}</Text>
+            </Card>
+          ) : filteredMeetings.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+              {filteredMeetings.map((meeting) => {
+                const totalActions = meeting.action_items?.length || 0;
+                const completedActions = meeting.action_items?.filter(a => a.status === 'done').length || 0;
+                const pendingActions = totalActions - completedActions;
+
+                return (
+                  <Link key={meeting.id} href={`/meetings/${meeting.id}`}>
+                    <Card 
+                      hoverable 
+                      style={{ 
+                        borderRadius: 16, 
+                        border: '1px solid #e5e7eb',
+                        height: '100%',
+                        transition: 'all 0.2s ease'
+                      }}
+                      styles={{ body: { padding: 24 } }}
+                    >
+                      <Space orientation="vertical" size={20} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <Tag variant="filled" color="processing" style={{ borderRadius: 6 }}>
+                            {new Date(meeting.date_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </Tag>
+                          <RightOutlined style={{ color: '#d1d5db' }} />
+                        </div>
+
+                        <div>
+                          <Title level={4} style={{ margin: '0 0 8px 0', fontSize: 18 }}>{meeting.title}</Title>
+                          <Text type="secondary" ellipsis style={{ display: 'block', fontSize: 13, minHeight: 20 }}>
+                            {meeting.notes || 'No summary provided.'}
+                          </Text>
+                        </div>
+
+                        <div style={{ height: '1px', background: '#f3f4f6', width: '100%' }} />
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Space size={4} wrap>
+                            <Tag variant="filled" color="default" style={{ fontSize: 10, margin: 0 }}>{totalActions} Total</Tag>
+                            {completedActions > 0 && (
+                              <Tag variant="filled" color="success" icon={<CheckCircleOutlined style={{ fontSize: 10 }} />} style={{ fontSize: 10, margin: 0 }}>{completedActions} Done</Tag>
+                            )}
+                            {pendingActions > 0 && (
+                              <Tag variant="filled" color="warning" icon={<ExclamationCircleOutlined style={{ fontSize: 10 }} />} style={{ fontSize: 10, margin: 0 }}>{pendingActions} Pending</Tag>
+                            )}
+                          </Space>
+                          <Text type="secondary" style={{ fontSize: 11 }}>
+                            {new Date(meeting.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </div>
+                      </Space>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <Empty description="No meetings scheduled." style={{ padding: '80px 0' }} />
+          )}
+        </Spin>
+      </Content>
+
+      <Modal 
+        title="New Meeting Details"
+        open={showAddModal} 
+        onCancel={() => setShowAddModal(false)}
+        onOk={handleAddMeeting}
+        confirmLoading={isSubmitting}
+        okText="Save Meeting"
+        width={480}
+        styles={{ header: { padding: '20px 24px' }, body: { padding: '24px' } }}
+      >
+        <Space orientation="vertical" size={20} style={{ width: '100%' }}>
+          <div>
+            <Text strong style={{ fontSize: 13, color: '#374151' }}>Meeting Topic</Text>
+            <Input 
+              autoFocus
+              placeholder="e.g. Frontend Architecture Sync" 
+              style={{ marginTop: 8, borderRadius: 8, height: 40 }}
+              value={newMeetingTitle}
+              onChange={(e) => setNewMeetingTitle(e.target.value)}
+            />
           </div>
-        ) : filteredMeetings.length > 0 ? (
-          filteredMeetings.map((meeting) => (
-            <Link key={meeting.id} href={`/meetings/${meeting.id}`}>
-              <motion.div 
-                whileHover={{ y: -4 }}
-                className="bg-card border border-border p-5 rounded-2xl flex items-center justify-between hover:shadow-lg transition-all group cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="bg-primary/10 text-primary p-3 rounded-xl">
-                    <Calendar size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">{meeting.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {mounted ? new Date(meeting.date_time).toLocaleDateString(undefined, { 
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                      }) : 'Loading date...'}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
-              </motion.div>
-            </Link>
-          ))
-        ) : (
-          <div className="text-center py-20 bg-secondary/50 rounded-3xl border border-dashed border-border">
-            <p className="text-muted-foreground">No meetings found. Start by adding one!</p>
+          <div>
+            <Text strong style={{ fontSize: 13, color: '#374151' }}>Short Description</Text>
+            <TextArea 
+              rows={4}
+              placeholder="Notes, goals or agenda items..." 
+              style={{ marginTop: 8, borderRadius: 8 }}
+              value={newMeetingNotes}
+              onChange={(e) => setNewMeetingNotes(e.target.value)}
+            />
           </div>
-        )}
-      </div>
-    </div>
+        </Space>
+      </Modal>
+    </Layout>
   );
 }
