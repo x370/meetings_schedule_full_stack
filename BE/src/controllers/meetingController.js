@@ -1,58 +1,41 @@
-const prisma = require('../lib/prisma');
+const meetingService = require('../services/meetingService');
+const { meetingSchema } = require('../schemas');
 
-// Create a meeting
-exports.createMeeting = async (req, res) => {
-    const { title, notes, date_time } = req.body;
-    if (!title) return res.status(400).json({ error: 'Title is required' });
-
-    try {
-        const meeting = await prisma.meeting.create({
-            data: {
-                title,
-                notes,
-                date_time: date_time ? new Date(date_time) : new Date(),
-            },
-        });
-        res.status(201).json(meeting);
-    } catch (err) {
-        console.error('❌ Prisma Error (createMeeting):', err);
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// List all meetings
 exports.getMeetings = async (req, res) => {
     try {
-        const meetings = await prisma.meeting.findMany({
-            orderBy: {
-                date_time: 'desc',
-            },
-            include: {
-                action_items: true,
-            },
-        });
+        const meetings = await meetingService.getAllMeetings();
         res.status(200).json(meetings);
     } catch (err) {
-        console.error('❌ Prisma Error (getMeetings):', err);
         res.status(500).json({ error: err.message });
     }
 };
 
-// Get single meeting with action items
 exports.getMeetingById = async (req, res) => {
-    const { id } = req.params;
     try {
-        const meeting = await prisma.meeting.findUnique({
-            where: { id: parseInt(id) },
-            include: {
-                action_items: true,
-            },
-        });
-        
-        if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
+        const meeting = await meetingService.getMeetingById(req.params.id);
         res.status(200).json(meeting);
     } catch (err) {
-        console.error('❌ Prisma Error (getMeetingById):', err);
+        const status = err.message === 'Meeting not found' ? 404 : 500;
+        res.status(status).json({ error: err.message });
+    }
+};
+
+exports.createMeeting = async (req, res) => {
+    try {
+        const validatedData = meetingSchema.parse(req.body);
+        const meeting = await meetingService.createNewMeeting(validatedData);
+        res.status(201).json(meeting);
+    } catch (err) {
+        const status = err.name === 'ZodError' ? 400 : 500;
+        res.status(status).json({ error: err.errors || err.message });
+    }
+};
+
+exports.deleteMeeting = async (req, res) => {
+    try {
+        await meetingService.deleteMeeting(req.params.id);
+        res.status(200).json({ message: 'Deleted' });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };

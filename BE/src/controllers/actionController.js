@@ -1,33 +1,31 @@
-const prisma = require('../lib/prisma');
+const actionService = require('../services/actionService');
+const { actionItemSchema } = require('../schemas');
 
-// Add an action item
 exports.addActionItem = async (req, res) => {
-    const { meeting_id, description } = req.body;
-    if (!meeting_id || !description) return res.status(400).json({ error: 'Meeting ID and description are required' });
-
     try {
-        const actionItem = await prisma.actionItem.create({
-            data: {
-                meeting_id: parseInt(meeting_id),
-                description,
-                status: 'pending',
-            },
-        });
-        res.status(201).json(actionItem);
+        const validatedData = actionItemSchema.parse(req.body);
+        const item = await actionService.addActionItem(validatedData);
+        res.status(201).json(item);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        const status = err.name === 'ZodError' ? 400 : 500;
+        res.status(status).json({ error: err.errors || err.message });
     }
 };
 
-// Mark action item as done
 exports.markAsDone = async (req, res) => {
-    const { id } = req.params;
     try {
-        const actionItem = await prisma.actionItem.update({
-            where: { id: parseInt(id) },
-            data: { status: 'done' },
-        });
-        res.status(200).json(actionItem);
+        const item = await actionService.toggleActionStatus(req.params.id);
+        res.status(200).json(item);
+    } catch (err) {
+        const status = err.message === 'Task not found' ? 404 : 500;
+        res.status(status).json({ error: err.message });
+    }
+};
+
+exports.deleteActionItem = async (req, res) => {
+    try {
+        await actionService.removeActionItem(req.params.id);
+        res.status(200).json({ message: 'Deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
