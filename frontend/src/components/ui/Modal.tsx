@@ -10,18 +10,17 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  maxWidth = 'max-w-xl' 
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = 'max-w-xl'
 }) => {
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -29,26 +28,21 @@ export const Modal: React.FC<ModalProps> = ({
             onClick={onClose}
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
           />
-
-          {/* Modal Content */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className={`relative w-full ${maxWidth} bg-card border border-border p-8 rounded-3xl shadow-2xl overflow-hidden`}
           >
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               {title && <h2 className="text-3xl font-bold">{title}</h2>}
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
               >
                 <X size={24} />
               </button>
             </div>
-
-            {/* Body */}
             <div>{children}</div>
           </motion.div>
         </div>
