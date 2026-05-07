@@ -10,7 +10,6 @@
   --foreground: #111827;
 }
 
-/* Force light mode regardless of OS settings */
 body {
   background-color: var(--background) !important;
   color: var(--foreground) !important;
@@ -20,12 +19,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ant Design Global Overrides */
-.ant-app {
-  background-color: var(--background) !important;
+.app-container {
+  min-height: 100vh;
+  background-color: var(--background);
 }
 
-/* Remove any accidental dark mode flickers */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #f9fafb;

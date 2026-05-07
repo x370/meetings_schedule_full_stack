@@ -1,31 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Button, 
-  Input, 
-  Modal, 
-  Card, 
-  Typography, 
-  Space, 
-  Empty, 
-  Spin, 
+import {
+  Button,
+  Input,
+  Modal,
+  Card,
+  Typography,
+  Space,
+  Empty,
+  Spin,
   App,
   Tag,
   Layout
 } from 'antd';
-import { 
-  PlusOutlined, 
-  SearchOutlined, 
-  CalendarOutlined, 
+import {
+  PlusOutlined,
+  SearchOutlined,
   RightOutlined,
   CheckCircleOutlined,
   VideoCameraOutlined,
-  ClockCircleOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { useMeetings } from '../hooks/useMeetings';
+import styles from './dashboard.module.css';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -66,67 +65,55 @@ export default function Home() {
     }
   };
 
-  const filteredMeetings = meetings.filter(m => 
+  const filteredMeetings = meetings.filter(m =>
     m.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (!mounted) return null;
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      <Header style={{ 
-        background: 'rgba(255, 255, 255, 0.8)', 
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #e5e7eb',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 40px',
-        height: 64
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ background: '#6366f1', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Layout className={styles.layout}>
+      <Header className={styles.header}>
+        <div className={styles.logoContainer}>
+          <div className={styles.logoIcon}>
             <VideoCameraOutlined style={{ color: 'white', fontSize: 18 }} />
           </div>
-          <Title level={4} style={{ margin: 0, letterSpacing: '-0.5px' }}>MeetNotes</Title>
+          <Title level={4} className={styles.logoText}>MeetNotes</Title>
         </div>
-        
+
         <Space size={16}>
-          <Input 
-            prefix={<SearchOutlined style={{ color: '#9ca3af' }} />} 
-            placeholder="Quick search..." 
+          <Input
+            prefix={<SearchOutlined style={{ color: '#9ca3af' }} />}
+            placeholder="Quick search..."
             variant="filled"
-            style={{ width: 240, borderRadius: 8 }}
+            className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={() => setShowAddModal(true)}
-            style={{ borderRadius: 8 }}
+            className={styles.newMeetingBtn}
           >
             New Meeting
           </Button>
         </Space>
       </Header>
 
-      <Content style={{ padding: '48px 40px', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: 40 }}>
-          <Title level={2} style={{ margin: 0, fontWeight: 700 }}>All Meetings</Title>
+      <Content className={styles.content}>
+        <div className={styles.sectionHeader}>
+          <Title level={2} className={styles.sectionTitle}>All Meetings</Title>
           <Text type="secondary">Review and manage your team synchronizations.</Text>
         </div>
 
         <Spin spinning={loading} description="Loading schedule...">
           {error ? (
-            <Card style={{ borderColor: '#fee2e2', background: '#fef2f2' }}>
+            <Card className={styles.errorCard}>
               <Text type="danger">{error}</Text>
             </Card>
           ) : filteredMeetings.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+            <div className={styles.gridContainer}>
               {filteredMeetings.map((meeting) => {
                 const totalActions = meeting.action_items?.length || 0;
                 const completedActions = meeting.action_items?.filter(a => a.status === 'done').length || 0;
@@ -134,44 +121,39 @@ export default function Home() {
 
                 return (
                   <Link key={meeting.id} href={`/meetings/${meeting.id}`}>
-                    <Card 
-                      hoverable 
-                      style={{ 
-                        borderRadius: 16, 
-                        border: '1px solid #e5e7eb',
-                        height: '100%',
-                        transition: 'all 0.2s ease'
-                      }}
+                    <Card
+                      hoverable
+                      className={styles.meetingCard}
                       styles={{ body: { padding: 24 } }}
                     >
-                      <Space orientation="vertical" size={20} style={{ width: '100%' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Tag variant="filled" color="processing" style={{ borderRadius: 6 }}>
+                      <Space orientation="vertical" size={20} className={styles.cardContent}>
+                        <div className={styles.cardHeader}>
+                          <Tag variant="filled" color="processing" className={styles.dateTag}>
                             {new Date(meeting.date_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                           </Tag>
                           <RightOutlined style={{ color: '#d1d5db' }} />
                         </div>
 
                         <div>
-                          <Title level={4} style={{ margin: '0 0 8px 0', fontSize: 18 }}>{meeting.title}</Title>
-                          <Text type="secondary" ellipsis style={{ display: 'block', fontSize: 13, minHeight: 20 }}>
+                          <Title level={4} className={styles.meetingTitle}>{meeting.title}</Title>
+                          <Text type="secondary" ellipsis className={styles.meetingNotes}>
                             {meeting.notes || 'No summary provided.'}
                           </Text>
                         </div>
 
-                        <div style={{ height: '1px', background: '#f3f4f6', width: '100%' }} />
+                        <div className={styles.divider} />
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className={styles.cardFooter}>
                           <Space size={4} wrap>
-                            <Tag variant="filled" color="default" style={{ fontSize: 10, margin: 0 }}>{totalActions} Total</Tag>
+                            <Tag variant="filled" color="default" className={styles.actionTag}>{totalActions} Total</Tag>
                             {completedActions > 0 && (
-                              <Tag variant="filled" color="success" icon={<CheckCircleOutlined style={{ fontSize: 10 }} />} style={{ fontSize: 10, margin: 0 }}>{completedActions} Done</Tag>
+                              <Tag variant="filled" color="success" icon={<CheckCircleOutlined style={{ fontSize: 10 }} />} className={styles.actionTag}>{completedActions} Done</Tag>
                             )}
                             {pendingActions > 0 && (
-                              <Tag variant="filled" color="warning" icon={<ExclamationCircleOutlined style={{ fontSize: 10 }} />} style={{ fontSize: 10, margin: 0 }}>{pendingActions} Pending</Tag>
+                              <Tag variant="filled" color="warning" icon={<ExclamationCircleOutlined style={{ fontSize: 10 }} />} className={styles.actionTag}>{pendingActions} Pending</Tag>
                             )}
                           </Space>
-                          <Text type="secondary" style={{ fontSize: 11 }}>
+                          <Text type="secondary" className={styles.timeText}>
                             {new Date(meeting.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </Text>
                         </div>
@@ -182,14 +164,14 @@ export default function Home() {
               })}
             </div>
           ) : (
-            <Empty description="No meetings scheduled." style={{ padding: '80px 0' }} />
+            <Empty description="No meetings scheduled." className={styles.emptyState} />
           )}
         </Spin>
       </Content>
 
-      <Modal 
+      <Modal
         title="New Meeting Details"
-        open={showAddModal} 
+        open={showAddModal}
         onCancel={() => setShowAddModal(false)}
         onOk={handleAddMeeting}
         confirmLoading={isSubmitting}
@@ -197,23 +179,23 @@ export default function Home() {
         width={480}
         styles={{ header: { padding: '20px 24px' }, body: { padding: '24px' } }}
       >
-        <Space orientation="vertical" size={20} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={20} className={styles.cardContent}>
           <div>
-            <Text strong style={{ fontSize: 13, color: '#374151' }}>Meeting Topic</Text>
-            <Input 
+            <Text strong className={styles.modalLabel}>Meeting Topic</Text>
+            <Input
               autoFocus
-              placeholder="e.g. Frontend Architecture Sync" 
-              style={{ marginTop: 8, borderRadius: 8, height: 40 }}
+              placeholder="e.g. Frontend Architecture Sync"
+              className={styles.modalInput}
               value={newMeetingTitle}
               onChange={(e) => setNewMeetingTitle(e.target.value)}
             />
           </div>
           <div>
-            <Text strong style={{ fontSize: 13, color: '#374151' }}>Short Description</Text>
-            <TextArea 
+            <Text strong className={styles.modalLabel}>Short Description</Text>
+            <TextArea
               rows={4}
-              placeholder="Notes, goals or agenda items..." 
-              style={{ marginTop: 8, borderRadius: 8 }}
+              placeholder="Notes, goals or agenda items..."
+              className={styles.modalTextarea}
               value={newMeetingNotes}
               onChange={(e) => setNewMeetingNotes(e.target.value)}
             />

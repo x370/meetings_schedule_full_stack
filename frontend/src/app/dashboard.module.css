@@ -1,0 +1,144 @@
+.layout {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoIcon {
+  background: #6366f1;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  margin: 0 !important;
+  letter-spacing: -0.5px;
+}
+
+.searchInput {
+  width: 240px;
+  border-radius: 8px;
+}
+
+.newMeetingBtn {
+  border-radius: 8px;
+}
+
+.content {
+  padding: 48px 40px !important;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.sectionHeader {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  margin: 0 !important;
+  font-weight: 700 !important;
+}
+
+.errorCard {
+  border-color: #fee2e2 !important;
+  background: #fef2f2 !important;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.meetingCard {
+  border-radius: 16px !important;
+  border: 1px solid #e5e7eb !important;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dateTag {
+  border-radius: 6px !important;
+}
+
+.meetingTitle {
+  margin: 0 0 8px 0 !important;
+  font-size: 18px !important;
+}
+
+.meetingNotes {
+  display: block !important;
+  font-size: 13px !important;
+  min-height: 20px;
+}
+
+.divider {
+  height: 1px;
+  background: #f3f4f6;
+  width: 100%;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actionTag {
+  font-size: 10px !important;
+  margin: 0 !important;
+}
+
+.timeText {
+  font-size: 11px !important;
+}
+
+.emptyState {
+  padding: 80px 0 !important;
+}
+
+.modalLabel {
+  font-size: 13px;
+  color: #374151;
+}
+
+.modalInput {
+  margin-top: 8px !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+}
+
+.modalTextarea {
+  margin-top: 8px !important;
+  border-radius: 8px !important;
+}

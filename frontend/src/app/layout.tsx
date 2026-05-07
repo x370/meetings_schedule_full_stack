@@ -56,7 +56,7 @@ export default function RootLayout({
               }
             }}
           >
-            <App style={{ minHeight: '100vh', background: '#f9fafb' }}>
+            <App className="app-container">
               {children}
             </App>
           </ConfigProvider>
