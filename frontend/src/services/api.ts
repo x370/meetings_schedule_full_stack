@@ -19,6 +19,10 @@ export const meetingService = {
     const response = await api.post('/meetings', data);
     return response.data;
   },
+  deleteMeeting: async (id: number) => {
+    const response = await api.delete(`/meetings/${id}`);
+    return response.data;
+  },
 };
 
 export const actionService = {

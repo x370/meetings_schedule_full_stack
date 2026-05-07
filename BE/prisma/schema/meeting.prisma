@@ -1,0 +1,9 @@
+model Meeting {
+  id          Int          @id @default(autoincrement())
+  title       String
+  date_time   DateTime     @default(now())
+  notes       String?
+  action_items ActionItem[]
+
+  @@map("meetings")
+}

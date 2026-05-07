@@ -12,7 +12,8 @@ import {
   Spin,
   App,
   Tag,
-  Layout
+  Layout,
+  Tooltip
 } from 'antd';
 import {
   PlusOutlined,
@@ -20,7 +21,8 @@ import {
   RightOutlined,
   CheckCircleOutlined,
   VideoCameraOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { useMeetings } from '../hooks/useMeetings';
@@ -31,7 +33,7 @@ const { TextArea } = Input;
 const { Header, Content } = Layout;
 
 export default function Home() {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -39,7 +41,7 @@ export default function Home() {
   const [newMeetingNotes, setNewMeetingNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { meetings, loading, error, addMeeting } = useMeetings();
+  const { meetings, loading, error, addMeeting, deleteMeeting } = useMeetings();
 
   useEffect(() => {
     setMounted(true);
@@ -63,6 +65,25 @@ export default function Home() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDeleteMeeting = (id: number) => {
+    modal.confirm({
+      title: 'Delete Meeting?',
+      icon: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: 'All associated action items will also be removed. This cannot be undone.',
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteMeeting(id);
+          message.success('Meeting deleted');
+        } catch (err) {
+          message.error('Failed to delete meeting');
+        }
+      },
+    });
   };
 
   const filteredMeetings = meetings.filter(m =>
@@ -126,6 +147,18 @@ export default function Home() {
                       className={styles.meetingCard}
                       styles={{ body: { padding: 24 } }}
                     >
+                      <Tooltip title="Delete Meeting">
+                        <Button
+                          type="text"
+                          icon={<DeleteOutlined />}
+                          className={styles.deleteBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDeleteMeeting(meeting.id);
+                          }}
+                        />
+                      </Tooltip>
                       <Space orientation="vertical" size={20} className={styles.cardContent}>
                         <div className={styles.cardHeader}>
                           <Tag variant="filled" color="processing" className={styles.dateTag}>

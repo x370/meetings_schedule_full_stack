@@ -8,7 +8,7 @@ const getMeetings = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-};
+};  
 
 const getMeetingById = async (req, res) => {
     try {

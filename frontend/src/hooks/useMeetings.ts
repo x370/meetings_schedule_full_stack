@@ -37,11 +37,20 @@ export function useMeetings() {
     }
   };
 
+  const deleteMeeting = async (id: number) => {
+    try {
+      await meetingService.deleteMeeting(id);
+      setMeetings(prev => prev.filter(m => m.id !== id));
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to delete meeting');
+    }
+  };
+
   useEffect(() => {
     fetchMeetings();
   }, [fetchMeetings]);
 
-  return { meetings, loading, error, fetchMeetings, addMeeting };
+  return { meetings, loading, error, fetchMeetings, addMeeting, deleteMeeting };
 }
 
 export function useMeeting(id: string) {
