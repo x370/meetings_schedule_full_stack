@@ -32,5 +32,15 @@ export function useActionItems() {
     }
   };
 
-  return { addActionItem, toggleActionStatus, loading, error };
+  const deleteActionItem = async (id: number) => {
+    try {
+      await actionService.deleteActionItem(id);
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete action item');
+      return false;
+    }
+  };
+
+  return { addActionItem, toggleActionStatus, deleteActionItem, loading, error };
 }

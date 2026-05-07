@@ -1,0 +1,167 @@
+.layout {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  height: 64px;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.logoIcon {
+  background: #6366f1;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoText {
+  margin: 0 !important;
+  letter-spacing: -0.5px;
+}
+
+.content {
+  padding: 48px 40px !important;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.backBtn {
+  color: #64748b !important;
+  padding-left: 0 !important;
+  margin-bottom: 24px !important;
+}
+
+.loaderContainer {
+  text-align: center;
+  padding: 100px 0;
+}
+
+.errorCard {
+  text-align: center;
+  border-radius: 16px !important;
+}
+
+.mainSpace {
+  width: 100%;
+}
+
+.headerInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.sessionTag {
+  margin-bottom: 12px !important;
+  border-radius: 6px !important;
+}
+
+.meetingTitle {
+  margin: 0 !important;
+  font-weight: 800 !important;
+}
+
+.metaInfo {
+  margin-top: 12px !important;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 32px;
+}
+
+.notesColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.notesCard {
+  border-radius: 16px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.notesParagraph {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.tasksColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tasksCard {
+  border-radius: 16px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.taskInputCompact {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.taskInput {
+  border-radius: 8px 0 0 8px !important;
+}
+
+.taskAddBtn {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taskItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.taskCheckbox {
+  margin-top: 4px !important;
+}
+
+.taskDescription {
+  font-size: 14px;
+  color: #374151;
+}
+
+.taskDone {
+  color: #9ca3af !important;
+}
+
+.emptyTasks {
+  font-size: 13px !important;
+  text-align: center;
+  padding: 12px 0 !important;
+}

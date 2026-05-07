@@ -2,29 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  Button, 
-  Card, 
-  Typography, 
-  Space, 
-  Input, 
-  Checkbox, 
-  Spin, 
+import {
+  Button,
+  Card,
+  Typography,
+  Space,
+  Input,
+  Checkbox,
+  Spin,
   App,
   Layout,
-  Tag
+  Tag,
+  Popconfirm
 } from 'antd';
-import { 
-  ArrowLeftOutlined, 
-  CalendarOutlined, 
-  ClockCircleOutlined, 
-  FileTextOutlined, 
-  PlusOutlined, 
+import {
+  ArrowLeftOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+  PlusOutlined,
   CheckSquareOutlined,
-  VideoCameraOutlined
+  VideoCameraOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import { useMeeting } from '../../../hooks/useMeetings';
 import { useActionItems } from '../../../hooks/useActionItems';
+import styles from './meetings.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Header, Content } = Layout;
@@ -35,9 +37,9 @@ export default function MeetingDetails() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [newAction, setNewAction] = useState('');
-  
+
   const { meeting, loading, error, setMeeting } = useMeeting(id as string);
-  const { addActionItem, toggleActionStatus, loading: isAddingAction } = useActionItems();
+  const { addActionItem, toggleActionStatus, deleteActionItem, loading: isAddingAction } = useActionItems();
 
   useEffect(() => {
     setMounted(true);
@@ -61,8 +63,8 @@ export default function MeetingDetails() {
 
   const handleToggleStatus = async (itemId: number) => {
     if (!meeting) return;
-    
-    const updatedItems = meeting.action_items.map((item: any) => 
+
+    const updatedItems = meeting.action_items.map((item: any) =>
       item.id === itemId ? { ...item, status: 'done' } : item
     );
     setMeeting({ ...meeting, action_items: updatedItems });
@@ -73,123 +75,125 @@ export default function MeetingDetails() {
     }
   };
 
+  const handleDeleteAction = async (itemId: number) => {
+    if (!meeting) return;
+
+    const success = await deleteActionItem(itemId);
+    if (success) {
+      const updatedItems = meeting.action_items.filter((item: any) => item.id !== itemId);
+      setMeeting({ ...meeting, action_items: updatedItems });
+      message.success('Task deleted');
+    } else {
+      message.error('Delete failed');
+    }
+  };
+
   if (!mounted) return null;
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      <Header style={{ 
-        background: 'rgba(255, 255, 255, 0.8)', 
-        backdropFilter: 'blur(8px)',
-        borderBottom: '1px solid #e5e7eb',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 40px',
-        height: 64
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => router.push('/')}>
-          <div style={{ background: '#6366f1', width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Layout className={styles.layout}>
+      <Header className={styles.header}>
+        <div className={styles.logoContainer} onClick={() => router.push('/')}>
+          <div className={styles.logoIcon}>
             <VideoCameraOutlined style={{ color: 'white', fontSize: 18 }} />
           </div>
-          <Title level={4} style={{ margin: 0, letterSpacing: '-0.5px' }}>MeetNotes</Title>
+          <Title level={4} className={styles.logoText}>MeetNotes</Title>
         </div>
       </Header>
 
-      <Content style={{ padding: '48px 40px', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        <Button 
-          type="link" 
+      <Content className={styles.content}>
+        <Button
+          type="link"
           size="small"
-          icon={<ArrowLeftOutlined />} 
+          icon={<ArrowLeftOutlined />}
           onClick={() => router.push('/')}
-          style={{ color: '#64748b', paddingLeft: 0, marginBottom: 24 }}
+          className={styles.backBtn}
         >
           Back to list
         </Button>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '100px 0' }}>
+          <div className={styles.loaderContainer}>
             <Spin size="large" description="Loading meeting details..." />
           </div>
         ) : error || !meeting ? (
-          <Card style={{ textAlign: 'center', borderRadius: 16 }}>
+          <Card className={styles.errorCard}>
             <Text type="danger">Meeting not found</Text>
           </Card>
         ) : (
-          <Space orientation="vertical" size={32} style={{ width: '100%' }}>
-            {/* Header Info */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Space orientation="vertical" size={32} className={styles.mainSpace}>
+            <div className={styles.headerInfo}>
               <div>
-                <Tag variant="filled" color="indigo" style={{ marginBottom: 12, borderRadius: 6 }}>Meeting Session</Tag>
-                <Title level={1} style={{ margin: 0, fontWeight: 800 }}>{meeting.title}</Title>
-                <Space size={16} style={{ marginTop: 12 }}>
+                <Tag variant="filled" color="indigo" className={styles.sessionTag}>Meeting Session</Tag>
+                <Title level={1} className={styles.meetingTitle}>{meeting.title}</Title>
+                <Space size={16} className={styles.metaInfo}>
                   <Text type="secondary"><CalendarOutlined /> {new Date(meeting.date_time).toLocaleDateString()}</Text>
                   <Text type="secondary"><ClockCircleOutlined /> {new Date(meeting.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                 </Space>
               </div>
             </div>
 
-            {/* Content Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
-              {/* Notes Area */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <Card title={<Text strong>Meeting Notes</Text>} style={{ borderRadius: 16, border: '1px solid #e5e7eb' }}>
-                  <Paragraph style={{ fontSize: 15, color: '#374151', lineHeight: 1.8, margin: 0 }}>
+            <div className={styles.detailGrid}>
+              <div className={styles.notesColumn}>
+                <Card title={<Text strong>Meeting Notes</Text>} className={styles.notesCard}>
+                  <Paragraph className={styles.notesParagraph}>
                     {meeting.notes || 'No notes were taken for this meeting.'}
                   </Paragraph>
                 </Card>
               </div>
 
-              {/* Tasks Area */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                <Card 
-                  title={<Text strong><CheckSquareOutlined /> Action Items</Text>} 
-                  style={{ borderRadius: 16, border: '1px solid #e5e7eb' }}
+              <div className={styles.tasksColumn}>
+                <Card
+                  title={<Text strong><CheckSquareOutlined /> Action Items</Text>}
+                  className={styles.tasksCard}
                   styles={{ body: { padding: '20px' } }}
                 >
-                  <Space.Compact style={{ width: '100%', marginBottom: 20 }}>
-                    <Input 
-                      placeholder="New task..." 
+                  <Space.Compact className={styles.taskInputCompact}>
+                    <Input
+                      placeholder="New task..."
                       value={newAction}
                       onChange={(e) => setNewAction(e.target.value)}
                       onPressEnter={handleAddAction}
-                      style={{ borderRadius: '8px 0 0 8px' }}
+                      className={styles.taskInput}
                     />
-                    <Button 
-                      type="primary" 
-                      icon={<PlusOutlined />} 
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
                       onClick={handleAddAction}
                       loading={isAddingAction}
-                      style={{ borderRadius: '0 8px 8px 0' }}
+                      className={styles.taskAddBtn}
                     />
                   </Space.Compact>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div className={styles.taskList}>
                     {(meeting.action_items || []).length > 0 ? (
                       meeting.action_items.map((item: any) => (
-                        <div key={item.id} style={{ 
-                          display: 'flex', 
-                          alignItems: 'flex-start', 
-                          gap: 12, 
-                          padding: '8px 0',
-                          borderBottom: '1px solid #f3f4f6'
-                        }}>
-                          <Checkbox 
-                            checked={item.status === 'done'} 
+                        <div key={item.id} className={styles.taskItem}>
+                          <Checkbox
+                            checked={item.status === 'done'}
                             onChange={() => item.status !== 'done' && handleToggleStatus(item.id)}
-                            style={{ marginTop: 4 }}
+                            className={styles.taskCheckbox}
                           />
-                          <Text delete={item.status === 'done'} style={{ 
-                            fontSize: 14, 
-                            color: item.status === 'done' ? '#9ca3af' : '#374151' 
-                          }}>
-                            {item.description}
-                          </Text>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <Text
+                              delete={item.status === 'done'}
+                              className={`${styles.taskDescription} ${item.status === 'done' ? styles.taskDone : ''}`}
+                            >
+                              {item.description}
+                            </Text>
+                            <Popconfirm
+                              title="Delete this task?"
+                              onConfirm={() => handleDeleteAction(item.id)}
+                              okText="Yes"
+                              cancelText="No"
+                            >
+                              <DeleteOutlined style={{ color: '#ff4d4f', cursor: 'pointer', marginLeft: 8 }} />
+                            </Popconfirm>
+                          </div>
                         </div>
                       ))
                     ) : (
-                      <Text type="secondary" style={{ fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
+                      <Text type="secondary" className={styles.emptyTasks}>
                         No follow-up tasks yet.
                       </Text>
                     )}

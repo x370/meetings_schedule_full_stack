@@ -30,6 +30,10 @@ export const actionService = {
     const response = await api.put(`/actions/${id}`);
     return response.data;
   },
+  deleteActionItem: async (id: number) => {
+    const response = await api.delete(`/actions/${id}`);
+    return response.data;
+  },
 };
 
 export default api;
